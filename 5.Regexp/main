@@ -36,7 +36,7 @@ def normalize_phone(raw: str) -> str:
         return ""
     m = PHONE_PATTERN.search(raw)
     if not m:
-        return raw  # не удалось распарсить — возвращаем как есть
+        return raw  
     g1, g2, g3, g4, g5, ext = m.groups()
     # Собираем основной номер в формате +7(999)999-99-99
     main = f"+7({g2}){g3}-{g4}-{g5}"
@@ -46,6 +46,19 @@ def normalize_phone(raw: str) -> str:
 
 for row in normalized:
     row[5] = normalize_phone(row[5])
+merged_dict = {}  # ключ — (lastname, firstname) → итоговая строка
+
+for row in normalized:
+    key = (row[0], row[1])  # (lastname, firstname)
+
+    if key not in merged_dict:
+        merged_dict[key] = row[:] 
+    else:
+        existing = merged_dict[key]
+        for i in range(len(existing)):
+            if not existing[i] and row[i]:
+                existing[i] = row[i]  
+result = list(merged_dict.values())
 with open("phonebook.csv", "w", encoding="utf-8") as f:
   datawriter = csv.writer(f, delimiter=',')
   # Вместо contacts_list подставьте свой список
